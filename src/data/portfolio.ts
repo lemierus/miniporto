@@ -1,4 +1,4 @@
-export type NavSection = 'home' | 'about' | 'skills' | 'projects' | 'experience' | 'education' | 'contact'
+export type NavSection = 'home' | 'about' | 'skills' | 'projects' | 'experience' | 'education' | 'achievements' | 'contact'
 export interface Project {
   title: string
   category: string
@@ -26,7 +26,7 @@ export interface StackItem {
 }
 
 export const profile = {
-  name: 'Nina Dwi Ariani',
+  // name: 'Nina Dwi Ariani',
   headline: 'Computer Science Education Graduate',
   subheadline: '& Web Developer',
   roles: ['Software Engineer', 'Web Developer', 'Frontend Developer', 'IT Teacher / Coding Teacher'],
@@ -43,6 +43,7 @@ export const navigation: Array<{ id: NavSection; label: string }> = [
   { id: 'projects', label: 'Projects' },
   { id: 'experience', label: 'Experience' },
   { id: 'education', label: 'Education' },
+  { id: 'achievements', label: 'Achievements' },
   { id: 'contact', label: 'Contact' },
 ]
 

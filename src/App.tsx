@@ -177,22 +177,45 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
+  // 1. Scroll Listener untuk deteksi posisi Paling Atas (Home)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY < 120) {
+        setActiveSection('home')
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // 2. Intersection Observer untuk mendeteksi section yang terlihat saat scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
+        // Cek jika posisi masih di paling atas, jangan override 'home'
+        if (window.scrollY < 120) {
+          setActiveSection('home')
+          return
+        }
+
         const visible = entries
           .filter((entry) => entry.isIntersecting)
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
 
         if (visible?.target instanceof HTMLElement) {
           const next = visible.target.id as SectionId
-          setActiveSection(next)
+          if (next) {
+            setActiveSection(next)
+          }
         }
       },
-      { rootMargin: '-30% 0px -55% 0px', threshold: [0.15, 0.3, 0.6] },
+      { rootMargin: '-20% 0px -50% 0px', threshold: [0.1, 0.3, 0.5] }
     )
 
-    sectionIds.forEach((id) => {
+    // Termasuk 'home' dan section lainnya
+    const allSectionIds = ['home', ...sectionIds]
+    allSectionIds.forEach((id) => {
       const element = document.getElementById(id)
       if (element) {
         observer.observe(element)
@@ -210,7 +233,8 @@ function App() {
   }, [mobileOpen])
 
   return (
-<div className="relative min-h-screen bg-ink text-slate-100">      <Background />
+    <div className="relative min-h-screen bg-ink text-slate-100">
+      <Background />
       <motion.div
         className="fixed left-0 top-0 z-50 h-1 origin-left bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400"
         style={{ scaleX }}
@@ -226,40 +250,44 @@ function App() {
         }}
       />
 
-<main className="relative z-10">
-  <Hero onViewWork={() => scrollToSection('projects')} />
+      <main className="relative z-10">
+        {/* TAMBAHKAN id="home" DI WRAPPER HERO INI */}
+        <div id="home">
+          <Hero onViewWork={() => scrollToSection('projects')} />
+        </div>
 
-  <SectionShell id="about" eyebrow="About">
-    <AboutSection />
-  </SectionShell>
+        <SectionShell id="about" eyebrow="About">
+          <AboutSection />
+        </SectionShell>
 
-  <SectionShell id="skills" eyebrow="Skills">
-    <SkillsSection />
-  </SectionShell>
+        <SectionShell id="skills" eyebrow="Skills">
+          <SkillsSection />
+        </SectionShell>
 
-  <SectionShell id="projects" eyebrow="Projects">
-    <ProjectsSection onSelectProject={setSelectedProject} />
-  </SectionShell>
+        <SectionShell id="projects" eyebrow="Projects">
+          <ProjectsSection onSelectProject={setSelectedProject} />
+        </SectionShell>
 
-  <SectionShell id="experience" eyebrow="Experience">
-    <ExperienceSection />
-  </SectionShell>
+        <SectionShell id="experience" eyebrow="Experience">
+          <ExperienceSection />
+        </SectionShell>
 
-  <SectionShell id="education" eyebrow="Education">
-    <EducationSection />
-  </SectionShell>
+        <SectionShell id="education" eyebrow="Education">
+          <EducationSection />
+        </SectionShell>
 
-  <SectionShell id="achievements" eyebrow="Achievements / Certifications">
-    <AchievementsSection />
-  </SectionShell>
+        <SectionShell id="achievements" eyebrow="Achievements / Certifications">
+          <AchievementsSection />
+        </SectionShell>
 
-  <SectionShell id="contact" eyebrow="Contact">
-    <ContactSection />
-  </SectionShell>
-</main>
+        <SectionShell id="contact" eyebrow="Contact">
+          <ContactSection />
+        </SectionShell>
+      </main>
 
       <Footer />
 
+      {/* Mobile Drawer & Modal */}
       <AnimatePresence>
         {mobileOpen ? (
           <motion.div
@@ -329,20 +357,26 @@ function Navbar({
   activeSection: SectionId
   mobileOpen: boolean
   onMobileToggle: () => void
-  onNavigate: (section: NavSection) => void
+  onNavigate: (section: SectionId) => void // Menggunakan SectionId
 }) {
   return (
-<header className="sticky top-0 z-30 border-b border-white/5 bg-slate-950/50 backdrop-blur-xl">      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 border-b border-white/5 bg-slate-950/50 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <button
           type="button"
-          onClick={() => scrollToSection('home')}
+          onClick={() => {
+            onNavigate('home')
+            scrollToSection('home')
+          }}
           className="group flex items-center gap-3 text-left"
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-semibold text-white shadow-glow transition duration-300 group-hover:-translate-y-0.5 group-hover:border-violet-400/30">
             N
           </span>
           <div>
-            <div className="font-display text-sm font-semibold tracking-[0.35em] text-white">NINA</div>
+            <div className="font-display text-sm font-semibold tracking-[0.35em] text-white">
+              NINA
+            </div>
             <div className="text-xs text-slate-400">Personal Portfolio</div>
           </div>
         </button>
@@ -362,14 +396,17 @@ function Navbar({
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <button
+          {/* <button
             type="button"
-            onClick={() => scrollToSection('projects')}
+            onClick={() => {
+              onNavigate('projects')
+              scrollToSection('projects')
+            }}
             className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:-translate-y-0.5 hover:border-violet-400/30 hover:bg-white/10"
           >
             View My Work
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </button> */}
           <a
             href={cvFile}
             download="CV.pdf"
@@ -440,7 +477,7 @@ function Hero({ onViewWork }: { onViewWork: () => void }) {
             transition={{ duration: 0.7, delay: 0.05 }}
             className="font-display max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-7xl"
           >
-            <span className="block">{profile.name}</span>
+            {/* <span className="block">{profile.name}</span> */}
             <span className="mt-4 block bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent">
               {profile.headline}
             </span>
@@ -789,18 +826,18 @@ function SkillsSection() {
   )
 }
 
-function ProjectsSection({
+export function ProjectsSection({
   onSelectProject,
 }: {
-  onSelectProject: (project: Project) => void
+  onSelectProject: (project: Project) => void;
 }) {
   return (
     <div className="grid gap-6 lg:grid-cols-12">
-      {/* Featured Project */}
+      {/* Featured Project Button */}
       <button
         type="button"
         onClick={() => onSelectProject(featuredProject)}
-        className="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/70 p-6 text-left lg:col-span-7"
+        className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-6 text-left backdrop-blur-xl transition duration-300 hover:border-violet-400/30 hover:bg-white/10 lg:col-span-7"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-transparent to-cyan-400/10 opacity-70 transition duration-500 group-hover:opacity-100" />
 
@@ -849,10 +886,10 @@ function ProjectsSection({
           <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
             <div className="grid gap-3">
               {[
-                ['Problem', featuredProject.problem],
-                ['Approach', featuredProject.approach],
-                ['Role', featuredProject.role],
-                ['Result', featuredProject.result],
+                ["Problem", featuredProject.problem],
+                ["Approach", featuredProject.approach],
+                ["Role", featuredProject.role],
+                ["Result", featuredProject.result],
               ].map(([label, value]) => (
                 <div
                   key={label}
@@ -922,7 +959,7 @@ function ProjectsSection({
         ))}
       </div>
     </div>
-  )
+  );
 }
 
 function ExperienceSection() {
