@@ -29,7 +29,7 @@ export const profile = {
   // name: 'Nina Dwi Ariani',
   headline: 'Computer Science Education Graduate',
   subheadline: '& Web Developer',
-  roles: ['Software Engineer', 'Web Developer', 'Frontend Developer', 'IT Teacher / Coding Teacher'],
+  roles: ['Web Developer', 'Frontend Developer', 'IT Teacher / Coding Teacher'],
   education: {
     institution: 'Universitas Negeri Padang',
     program: 'Computer Science Education',
@@ -195,7 +195,7 @@ export const experienceItems = [
     type: 'Administration / Service',
     date: 'Jan 2026 - Mar 2026',
     description:
-      'Managed and accurately maintained library collection and member data using Excel and Word, ensuring information remained organized, accessible, and error-free. Supported daily administrative operations through data verification, document filing, and systematic record management, demonstrating strong attention to detail and data accuracy.',
+      'Managed and accurately maintained library books collection using Excel and Word, ensuring information remained organized, accessible, and error-free. Supported daily administrative operations through data verification, document filing, and systematic record management, demonstrating strong attention to detail and data accuracy.',
     responsibilities: ['1,000+ book records', 'Data validation', 'Data verification', 'Microsoft Excel'],
   },
 ]

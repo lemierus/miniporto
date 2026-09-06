@@ -2,8 +2,6 @@ import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'fra
 import cvFile from './assets/CV.pdf'
 import { ExternalLink } from "lucide-react"
 
-
-// Import gabungan dari './data/portfolio' (Cukup 1 kali)
 import { 
   type Project, 
   featuredProject, 
@@ -56,7 +54,6 @@ export function FlippableImage({
       className="relative h-72 w-full cursor-pointer select-none sm:h-96 [perspective:1200px]"
       onClick={handleNext}
     >
-      {/* 1. KARTU BACKGROUND (Tumpukan paling belakang) */}
       <div
         className="
           absolute inset-0 overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-lg
@@ -70,13 +67,11 @@ export function FlippableImage({
         />
       </div>
 
-      {/* 2. STACK ANIMASI DINAMIS */}
       <AnimatePresence mode="popLayout" onExitComplete={() => setIsAnimating(false)}>
         <motion.div
           key={`card-${currentIndex}`}
           className="absolute inset-0 overflow-hidden rounded-2xl border border-white/20 bg-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-          
-          // ANIMASI MASUK (Gambar baru maju dari belakang dengan anggun)
+
           initial={{
             scale: 0.9,
             y: -20,
@@ -94,17 +89,15 @@ export function FlippableImage({
             },
           }}
 
-          // ANIMASI KELUAR (Fade out diperhalus & ditahan lebih lama)
           exit={{
             y: [0, -25, 110, 130],
             z: [0, 50, -60, -120],
             rotateX: [0, 10, -12, -18],
             scale: [1, 1.02, 0.95, 0.88],
-            // OPACITY DITAHAN: Tetap 1 saat ditarik & meluncur, baru fade out di paling akhir
             opacity: [1, 1, 0.9, 0],
             transition: {
               duration: 1.2,
-              times: [0, 0.3, 0.8, 1], // Jalur tumpuan waktu fade out
+              times: [0, 0.3, 0.8, 1],
               ease: [0.22, 1, 0.36, 1],
             },
           }}
@@ -115,20 +108,16 @@ export function FlippableImage({
             className="h-full w-full object-cover"
           />
 
-          {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-black/20" />
 
-          {/* Glare Light Effect */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent" />
 
-          {/* Badge Indikator Angka */}
           <div className="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 rounded-full border border-white/15 bg-slate-950/70 px-3.5 py-1.5 text-xs font-semibold text-slate-200 backdrop-blur-md shadow-lg">
             <span>{currentIndex + 1}</span>
             <span className="text-slate-500">/</span>
             <span className="text-slate-400">{images.length}</span>
           </div>
 
-          {/* Text Hint */}
           <div className="absolute bottom-4 left-4 z-10 rounded-full border border-white/10 bg-slate-950/60 px-3 py-1.5 text-[10px] font-medium uppercase tracking-widest text-slate-300 backdrop-blur-md">
             Tap to shuffle
           </div>
@@ -165,8 +154,6 @@ import { useEffect, useState, useRef } from 'react'
 import type { ReactNode } from 'react'
 import profilePhoto from './profile-pict.jpg'
 
-// ❌ HAPUS deklarasi "type Project = { ... }" lokal di sini agar tidak bentrok!
-
 type SectionId = NavSection | 'achievements' | 'beyond'
 
 const sectionIds: SectionId[] = ['home', 'about', 'skills', 'projects', 'experience', 'education', 'achievements', 'beyond', 'contact']
@@ -179,7 +166,6 @@ export function App() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
-  // Flag untuk mencegah perpindahan state otomatis saat user klik menu navbar
   const isProgrammaticScroll = useRef(false)
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -190,25 +176,20 @@ export function App() {
     if (scrollTimeout.current) clearTimeout(scrollTimeout.current)
 
     scrollToSection(section)
-
-    // Lock diaktifkan sampai animasi smooth scroll selesai
     scrollTimeout.current = setTimeout(() => {
       isProgrammaticScroll.current = false
     }, 900)
   }
 
-  // Deteksi Aktif Berdasarkan Jarak Posisi Layout (Paling Akurat & Bebas Bug)
   useEffect(() => {
     const handleScroll = () => {
       if (isProgrammaticScroll.current) return
 
-      // Jika di paling atas, paksa ke 'home'
       if (window.scrollY < 80) {
         setActiveSection('home')
         return
       }
 
-      // Cek apakah scroll sudah mencapai bagian paling bawah halaman (Contact)
       const isAtBottom =
         window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50
 
@@ -218,7 +199,7 @@ export function App() {
       }
 
       const allSectionIds = ['home', ...sectionIds] as SectionId[]
-      const viewportCenter = window.innerHeight / 3 // Fokus titik acuan di 1/3 bagian atas layar
+      const viewportCenter = window.innerHeight / 3 
 
       let currentActive: SectionId = 'home'
       let minDistance = Infinity
@@ -228,10 +209,8 @@ export function App() {
         if (!element) return
 
         const rect = element.getBoundingClientRect()
-        // Hitung seberapa dekat bagian atas section ke garis pemicu viewport
         const distance = Math.abs(rect.top - viewportCenter)
 
-        // Cari section yang paling dekat dengan titik tengah pengamatan
         if (rect.top <= viewportCenter + 100 && distance < minDistance) {
           minDistance = distance
           currentActive = id
@@ -242,13 +221,11 @@ export function App() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    // Panggil sekali di awal untuk sinkronisasi posisi
     handleScroll()
 
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Lock body scroll saat mobile drawer terbuka
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => {
@@ -260,13 +237,11 @@ export function App() {
     <div className="relative min-h-screen bg-ink text-slate-100">
       <Background />
 
-      {/* Progress Bar Top */}
       <motion.div
         className="fixed left-0 top-0 z-50 h-1 origin-left bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400"
         style={{ scaleX }}
       />
 
-      {/* Navigation Header */}
       <Navbar
         activeSection={activeSection}
         mobileOpen={mobileOpen}
@@ -277,7 +252,6 @@ export function App() {
         }}
       />
 
-      {/* Main Content */}
       <main className="relative z-10">
         <div id="home">
           <Hero onViewWork={() => handleNavigate('projects')} />
@@ -314,7 +288,6 @@ export function App() {
 
       <Footer />
 
-      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen ? (
           <motion.div
@@ -364,7 +337,6 @@ export function App() {
         ) : null}
       </AnimatePresence>
 
-      {/* Project Modal */}
       <AnimatePresence>
         {selectedProject ? (
           <ProjectModal
@@ -490,7 +462,7 @@ function Hero({ onViewWork }: { onViewWork: () => void }) {
             transition={{ duration: 0.7, delay: 0.05 }}
             className="font-display max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight text-white sm:text-6xl lg:text-7xl"
           >
-            {/* <span className="block">{profile.name}</span> */}
+
             <span className="mt-4 block bg-gradient-to-r from-white via-violet-200 to-cyan-200 bg-clip-text text-transparent">
               {profile.headline}
             </span>
@@ -503,7 +475,6 @@ function Hero({ onViewWork }: { onViewWork: () => void }) {
             transition={{ duration: 0.7, delay: 0.12 }}
             className="mt-8 max-w-2xl text-lg leading-8 text-slate-300"
           >
-            {/* {profile.summary} */}
           </motion.p>
 
           <motion.div
@@ -833,7 +804,6 @@ function AboutSection() {
 function SkillsSection() {
   return (
     <div className="flex flex-col gap-10">
-      {/* Visual Icon Marquee / Highlights */}
       <StackMarquee />
     </div>
   )
@@ -846,7 +816,6 @@ export function ProjectsSection({
 }) {
   return (
     <div className="grid gap-6 lg:grid-cols-12">
-      {/* Featured Project Button */}
       <button
         type="button"
         onClick={() => onSelectProject(featuredProject)}
@@ -855,7 +824,6 @@ export function ProjectsSection({
         <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 via-transparent to-cyan-400/10 opacity-70 transition duration-500 group-hover:opacity-100" />
 
         <div className="relative grid gap-6 md:grid-cols-[1.1fr_0.9fr]">
-          {/* Left Content */}
           <div>
             <span className="inline-flex rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-violet-200">
               Featured Project
@@ -869,7 +837,6 @@ export function ProjectsSection({
               {featuredProject.description}
             </p>
 
-            {/* Technologies */}
             <div className="mt-6 flex flex-wrap gap-2">
               {featuredProject.technologies.map((tech) => (
                 <span
@@ -881,21 +848,19 @@ export function ProjectsSection({
               ))}
             </div>
 
-            {/* Actions */}
             <div className="mt-6 flex flex-wrap gap-3">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
                 <SquareTerminal className="h-4 w-4 text-cyan-300" />
                 Open case study
               </span>
 
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
+              {/* <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300">
                 <MoonStar className="h-4 w-4 text-violet-300" />
                 Abstract UI showcase
-              </span>
+              </span> */}
             </div>
           </div>
 
-          {/* Project Summary */}
           <div className="rounded-[1.75rem] border border-white/10 bg-slate-950/60 p-5">
             <div className="grid gap-3">
               {[
@@ -922,7 +887,6 @@ export function ProjectsSection({
         </div>
       </button>
 
-      {/* Other Projects */}
       <div className="grid gap-4 lg:col-span-5">
         {otherProjects.map((project, index) => (
           <motion.button
@@ -938,7 +902,7 @@ export function ProjectsSection({
             }}
             className="group rounded-[1.5rem] border border-white/10 bg-white/5 p-5 text-left backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-violet-400/25 hover:bg-white/10"
           >
-            {/* Category + Arrow */}
+
             <div className="flex items-center justify-between gap-3">
               <span className="rounded-full border border-white/10 bg-slate-950/50 px-3 py-1 text-xs uppercase tracking-[0.25em] text-slate-400">
                 {project.category}
@@ -947,17 +911,14 @@ export function ProjectsSection({
               <ArrowRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-1 group-hover:text-violet-300" />
             </div>
 
-            {/* Title */}
             <h3 className="mt-4 font-display text-2xl font-semibold text-white">
               {project.title}
             </h3>
 
-            {/* Description */}
             <p className="mt-3 text-sm leading-6 text-slate-300">
               {project.description}
             </p>
 
-            {/* Technologies */}
             <div className="mt-4 flex flex-wrap gap-2">
               {project.technologies.map((tech) => (
                 <span
@@ -1039,7 +1000,6 @@ function EducationSection() {
   return (
     <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
 
-      {/* Kartu Pendidikan Utama */}
       <motion.div
         initial={{ opacity: 0, x: -60 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -1067,7 +1027,6 @@ function EducationSection() {
         </p>
       </motion.div>
 
-      {/* Detail Pendidikan */}
       <div className="grid gap-4 sm:grid-cols-2">
         {detailCards.map((card, index) => (
         <motion.div
@@ -1145,7 +1104,6 @@ export function AchievementsSection() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
-      {/* Achievement - Larger Card */}
       <motion.div
         initial={{ opacity: 0, x: -60 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -1214,7 +1172,6 @@ export function AchievementsSection() {
         </div>
       </motion.div>
 
-      {/* Certifications - Compact List */}
       <motion.div
         initial={{ opacity: 0, x: 60 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -1242,7 +1199,6 @@ export function AchievementsSection() {
           </div>
         </div>
 
-        {/* Certification Scrollable Container */}
         <div className="relative mt-4">
           <div className="max-h-[300px] overflow-y-auto divide-y divide-white/10 rounded-xl border border-white/10 bg-white/[0.02] pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20">
             {certifications.map((item, index) => (
@@ -1252,7 +1208,6 @@ export function AchievementsSection() {
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
               >
-                {/* Info Sertifikat */}
                 <div className="min-w-0 flex-1">
                   <h4 className="truncate text-xs font-medium text-white">
                     {item.title}
@@ -1270,7 +1225,6 @@ export function AchievementsSection() {
                   </div>
                 </div>
 
-                {/* Tombol Preview */}
                 <button
                   type="button"
                   onClick={() =>
@@ -1295,7 +1249,6 @@ export function AchievementsSection() {
             ))}
           </div>
 
-          {/* Floating Hover Preview (di luar div scrollbar agar tidak terpotong) */}
           {hoveredIndex !== null && (
             <div className="pointer-events-none absolute right-16 top-1/2 z-50 hidden w-64 -translate-y-1/2 rounded-xl border border-white/20 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-md md:block">
               <img
@@ -1310,7 +1263,6 @@ export function AchievementsSection() {
           )}
         </div>
 
-        {/* Modal Lightbox Pop-up */}
         {selectedImage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
             <div className="relative max-h-[90vh] w-full max-w-xl rounded-2xl border border-white/10 bg-slate-900 p-4 shadow-2xl">
@@ -1343,7 +1295,6 @@ export function AchievementsSection() {
 function ContactSection() {
   const hasContact = Boolean(contactDetails.email || contactDetails.linkedin);
 
-  // Helper untuk format nomor telepon/WhatsApp
   const cleanPhone = contactDetails.phone?.replace(/[^0.9]/g, "") || "";
   const whatsappUrl = cleanPhone
     ? `https://wa.me/${cleanPhone.startsWith("0") ? "62" + cleanPhone.slice(1) : cleanPhone}`
@@ -1351,7 +1302,6 @@ function ContactSection() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-      {/* CTA - Slide From Left */}
       <motion.div
         initial={{ opacity: 0, x: -60 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -1362,9 +1312,9 @@ function ContactSection() {
         }}
         className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-violet-500/15 via-white/5 to-cyan-400/10 p-8 backdrop-blur-xl"
       >
-        <span className="inline-flex rounded-full border border-white/10 bg-slate-950/40 px-3 py-1 text-xs uppercase tracking-[0.3em] text-violet-100">
+        {/* <span className="inline-flex rounded-full border border-white/10 bg-slate-950/40 px-3 py-1 text-xs uppercase tracking-[0.3em] text-violet-100">
           Let&apos;s Build Something
-        </span>
+        </span> */}
 
         <h3 className="mt-5 font-display text-4xl font-semibold text-white">
           LET&apos;S BUILD SOMETHING
@@ -1398,7 +1348,6 @@ function ContactSection() {
         </div>
       </motion.div>
 
-      {/* Contact Details - Slide From Right */}
       <motion.div
         initial={{ opacity: 0, x: 60 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -1416,7 +1365,6 @@ function ContactSection() {
   icon: <MonitorSmartphone className="h-5 w-5" />,
   label: "Email",
   value: contactDetails.email || "Not listed on the CV",
-  // Gunakan link Gmail Web Compose berikut:
   href: contactDetails.email
     ? `https://mail.google.com/mail/?view=cm&fs=1&to=${contactDetails.email}`
     : undefined,
@@ -1558,7 +1506,6 @@ function ContactItem({ icon, label, value, href, disabled }: ContactItemProps) {
         </div>
       </div>
 
-      {/* Tombol View (Persis seperti View Publication) */}
       {isClickable && (
         <div className="mt-2 sm:mt-0 flex shrink-0 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-slate-200 shadow-sm transition-all duration-300 group-hover:border-white/20 group-hover:bg-white/15 group-hover:text-white">
           <span>View</span>
