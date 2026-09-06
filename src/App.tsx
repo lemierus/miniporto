@@ -2,6 +2,7 @@ import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'fra
 import cvFile from './assets/CV.pdf'
 import { ExternalLink } from "lucide-react"
 
+
 // Import gabungan dari './data/portfolio' (Cukup 1 kali)
 import { 
   type Project, 
@@ -160,7 +161,7 @@ import {
   SquareTerminal,
   X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { ReactNode } from 'react'
 import profilePhoto from './profile-pict.jpg'
 
@@ -170,61 +171,84 @@ type SectionId = NavSection | 'achievements' | 'beyond'
 
 const sectionIds: SectionId[] = ['home', 'about', 'skills', 'projects', 'experience', 'education', 'achievements', 'beyond', 'contact']
 
-function App() {
+export function App() {
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 24, mass: 0.2 })
+
   const [activeSection, setActiveSection] = useState<SectionId>('home')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
 
-  // 1. Scroll Listener untuk deteksi posisi Paling Atas (Home)
+  // Flag untuk mencegah perpindahan state otomatis saat user klik menu navbar
+  const isProgrammaticScroll = useRef(false)
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleNavigate = (section: SectionId) => {
+    setActiveSection(section)
+    isProgrammaticScroll.current = true
+
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current)
+
+    scrollToSection(section)
+
+    // Lock diaktifkan sampai animasi smooth scroll selesai
+    scrollTimeout.current = setTimeout(() => {
+      isProgrammaticScroll.current = false
+    }, 900)
+  }
+
+  // Deteksi Aktif Berdasarkan Jarak Posisi Layout (Paling Akurat & Bebas Bug)
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY < 120) {
+      if (isProgrammaticScroll.current) return
+
+      // Jika di paling atas, paksa ke 'home'
+      if (window.scrollY < 80) {
         setActiveSection('home')
+        return
       }
+
+      // Cek apakah scroll sudah mencapai bagian paling bawah halaman (Contact)
+      const isAtBottom =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50
+
+      if (isAtBottom) {
+        setActiveSection('contact')
+        return
+      }
+
+      const allSectionIds = ['home', ...sectionIds] as SectionId[]
+      const viewportCenter = window.innerHeight / 3 // Fokus titik acuan di 1/3 bagian atas layar
+
+      let currentActive: SectionId = 'home'
+      let minDistance = Infinity
+
+      allSectionIds.forEach((id) => {
+        const element = document.getElementById(id)
+        if (!element) return
+
+        const rect = element.getBoundingClientRect()
+        // Hitung seberapa dekat bagian atas section ke garis pemicu viewport
+        const distance = Math.abs(rect.top - viewportCenter)
+
+        // Cari section yang paling dekat dengan titik tengah pengamatan
+        if (rect.top <= viewportCenter + 100 && distance < minDistance) {
+          minDistance = distance
+          currentActive = id
+        }
+      })
+
+      setActiveSection(currentActive)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
+    // Panggil sekali di awal untuk sinkronisasi posisi
+    handleScroll()
+
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // 2. Intersection Observer untuk mendeteksi section yang terlihat saat scroll
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        // Cek jika posisi masih di paling atas, jangan override 'home'
-        if (window.scrollY < 120) {
-          setActiveSection('home')
-          return
-        }
-
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-
-        if (visible?.target instanceof HTMLElement) {
-          const next = visible.target.id as SectionId
-          if (next) {
-            setActiveSection(next)
-          }
-        }
-      },
-      { rootMargin: '-20% 0px -50% 0px', threshold: [0.1, 0.3, 0.5] }
-    )
-
-    // Termasuk 'home' dan section lainnya
-    const allSectionIds = ['home', ...sectionIds]
-    allSectionIds.forEach((id) => {
-      const element = document.getElementById(id)
-      if (element) {
-        observer.observe(element)
-      }
-    })
-
-    return () => observer.disconnect()
-  }, [])
-
+  // Lock body scroll saat mobile drawer terbuka
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => {
@@ -235,25 +259,28 @@ function App() {
   return (
     <div className="relative min-h-screen bg-ink text-slate-100">
       <Background />
+
+      {/* Progress Bar Top */}
       <motion.div
         className="fixed left-0 top-0 z-50 h-1 origin-left bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400"
         style={{ scaleX }}
       />
 
+      {/* Navigation Header */}
       <Navbar
         activeSection={activeSection}
         mobileOpen={mobileOpen}
         onMobileToggle={() => setMobileOpen((value) => !value)}
         onNavigate={(section) => {
-          setActiveSection(section)
+          handleNavigate(section)
           setMobileOpen(false)
         }}
       />
 
+      {/* Main Content */}
       <main className="relative z-10">
-        {/* TAMBAHKAN id="home" DI WRAPPER HERO INI */}
         <div id="home">
-          <Hero onViewWork={() => scrollToSection('projects')} />
+          <Hero onViewWork={() => handleNavigate('projects')} />
         </div>
 
         <SectionShell id="about" eyebrow="About">
@@ -287,7 +314,7 @@ function App() {
 
       <Footer />
 
-      {/* Mobile Drawer & Modal */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {mobileOpen ? (
           <motion.div
@@ -305,7 +332,9 @@ function App() {
               onClick={(event) => event.stopPropagation()}
             >
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">Navigation</span>
+                <span className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-400">
+                  Navigation
+                </span>
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
@@ -315,6 +344,7 @@ function App() {
                   <X className="h-4 w-4" />
                 </button>
               </div>
+
               <div className="grid gap-2">
                 {navigation.map((item) => (
                   <NavButton
@@ -323,8 +353,7 @@ function App() {
                     active={activeSection === item.id}
                     mobile
                     onClick={() => {
-                      setActiveSection(item.id)
-                      scrollToSection(item.id)
+                      handleNavigate(item.id)
                       setMobileOpen(false)
                     }}
                   />
@@ -335,6 +364,7 @@ function App() {
         ) : null}
       </AnimatePresence>
 
+      {/* Project Modal */}
       <AnimatePresence>
         {selectedProject ? (
           <ProjectModal
@@ -357,17 +387,14 @@ function Navbar({
   activeSection: SectionId
   mobileOpen: boolean
   onMobileToggle: () => void
-  onNavigate: (section: SectionId) => void // Menggunakan SectionId
+  onNavigate: (section: SectionId) => void
 }) {
   return (
     <header className="sticky top-0 z-30 border-b border-white/5 bg-slate-950/50 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         <button
           type="button"
-          onClick={() => {
-            onNavigate('home')
-            scrollToSection('home')
-          }}
+          onClick={() => onNavigate('home')}
           className="group flex items-center gap-3 text-left"
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-semibold text-white shadow-glow transition duration-300 group-hover:-translate-y-0.5 group-hover:border-violet-400/30">
@@ -387,26 +414,12 @@ function Navbar({
               key={item.id}
               label={item.label}
               active={activeSection === item.id}
-              onClick={() => {
-                onNavigate(item.id)
-                scrollToSection(item.id)
-              }}
+              onClick={() => onNavigate(item.id)}
             />
           ))}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          {/* <button
-            type="button"
-            onClick={() => {
-              onNavigate('projects')
-              scrollToSection('projects')
-            }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:-translate-y-0.5 hover:border-violet-400/30 hover:bg-white/10"
-          >
-            View My Work
-            <ArrowRight className="h-4 w-4" />
-          </button> */}
           <a
             href={cvFile}
             download="CV.pdf"
