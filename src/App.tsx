@@ -1071,22 +1071,16 @@ export function AchievementsSection() {
 
   const certifications = [
     {
-      title: "Website Development Fundamental",
-      issuer: "MySkill",
-      image: "/images/sertifwahid.jpg",
+      title: "English Speaking Level Test",
+      issuer: "SmallTalk2Me",
+      image: "/images/englishcertif.png",
+      note: "Issued Sept 7, 2026",
+    },
+    {
+      title: "Essential Skills: Emotional Intelligence",
+      issuer: "CAMY",
+      image: "/images/sertiffor.jpeg",
       note: "Issued Sept 3, 2026",
-    },
-    {
-      title: "CSS Mini Project",
-      issuer: "MySkill",
-      image: "/images/sertifcss.jpg",
-      note: "Issued Aug 28, 2026",
-    },
-    {
-      title: "Frontend CSS",
-      issuer: "MySkill",
-      image: "/images/sertiftriz.jpg",
-      note: "Issued Aug 28, 2026",
     },
     {
       title: "Essential Skills: Self Efficacy",
@@ -1095,10 +1089,22 @@ export function AchievementsSection() {
       note: "Issued Sept 3, 2026",
     },
     {
-      title: "Essential Skills: Emotional Intelligence",
-      issuer: "CAMY",
-      image: "/images/sertiffor.jpeg",
+      title: "Website Development Fundamental",
+      issuer: "MySkill",
+      image: "/images/sertifwahid.jpg",
       note: "Issued Sept 3, 2026",
+    },
+    {
+      title: "Frontend CSS",
+      issuer: "MySkill",
+      image: "/images/sertiftriz.jpg",
+      note: "Issued Aug 28, 2026",
+    },
+    {
+      title: "CSS Mini Project",
+      issuer: "MySkill",
+      image: "/images/sertifcss.jpg",
+      note: "Issued Aug 28, 2026",
     },
   ];
 
