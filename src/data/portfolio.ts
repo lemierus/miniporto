@@ -121,7 +121,7 @@ export const featuredProject = {
 
   images: [
     '/images/cemeteryweb.png',
-    '/images/projweb.png'  
+    '/images/cemeteryweb2.png'  
   ],
   result:
     'Delivered a user-friendly web solution designed to work across screen sizes and support consistent cemetery service administration.',
