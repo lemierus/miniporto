@@ -1546,6 +1546,8 @@ function ProjectModal({
   featured: boolean
   onClose: () => void
 }) {
+  const [selectedPreviewImage, setSelectedPreviewImage] = useState<string | null>(null)
+
   const projectImages = project.images && project.images.length > 0 
     ? project.images 
     : project.image 
@@ -1553,107 +1555,165 @@ function ProjectModal({
     : []
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-8 backdrop-blur-md"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
+    <>
       <motion.div
-        className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/10 bg-slate-950/95 p-6 shadow-glow sm:p-8"
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.98 }}
-        transition={{ duration: 0.24 }}
-        onClick={(event) => event.stopPropagation()}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-8 backdrop-blur-md"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
       >
-        {/* Header Modal */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.28em] text-slate-400">
-              {project.category}
-            </span>
-            <h3 className="mt-4 font-display text-3xl font-semibold text-white">{project.title}</h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
-            aria-label="Close project details"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <div className="mt-8 grid gap-4 lg:grid-cols-2">
-          <InfoCard
-            title="Overview"
-            text={project.overview}
-          />
-
-          <InfoCard
-            title="Approach"
-            text={project.approach}
-          />
-
-          <InfoCard
-            title="Problem"
-            text={project.problem}
-          />
-
-          <InfoCard
-            title="Role"
-            text={project.role}
-          />
-        </div>
-
-        <div className="mt-8">
-          <div className="text-sm uppercase tracking-[0.25em] text-slate-500">Technologies</div>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {project.technologies.map((tech) => (
-              <span key={tech} className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200">
-                {tech}
+        <motion.div
+          className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] border border-white/10 bg-slate-950/95 p-6 shadow-glow sm:p-8"
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.98 }}
+          transition={{ duration: 0.24 }}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {/* Header Modal */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.28em] text-slate-400">
+                {project.category}
               </span>
-            ))}
+              <h3 className="mt-4 font-display text-3xl font-semibold text-white">{project.title}</h3>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white"
+              aria-label="Close project details"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-        </div>
 
-        {featured && (
+          <div className="mt-8 grid gap-4 lg:grid-cols-2">
+            <InfoCard
+              title="Overview"
+              text={project.overview}
+            />
+
+            <InfoCard
+              title="Approach"
+              text={project.approach}
+            />
+
+            <InfoCard
+              title="Problem"
+              text={project.problem}
+            />
+
+            <InfoCard
+              title="Role"
+              text={project.role}
+            />
+          </div>
+
           <div className="mt-8">
-            <div className="text-sm uppercase tracking-[0.25em] text-slate-500">Key Features</div>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {featuredProject.features.map((feature) => (
-                <div key={feature} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
-                  {feature}
-                </div>
+            <div className="text-sm uppercase tracking-[0.25em] text-slate-500">Technologies</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {project.technologies.map((tech) => (
+                <span key={tech} className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200">
+                  {tech}
+                </span>
               ))}
             </div>
           </div>
-        )}
 
-        {featured && (
-          <div className="mt-8 flex justify-center">
-            <a
-              href="https://github.com/lemierus/TPUPROJECT"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5"
-            >
-              GitHub Link
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-        )}
+          {featured && (
+            <div className="mt-8">
+              <div className="text-sm uppercase tracking-[0.25em] text-slate-500">Key Features</div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {featuredProject.features.map((feature) => (
+                  <div key={feature} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {/* 📸 FOTO TERLETAK PALING BAWAH (MENGGANTIKAN TEKS LINK PLACEHOLDER) */}
-        {projectImages.length > 0 && (
-          <div className="mt-8">
-            <FlippableImage images={projectImages} title={project.title} />
-          </div>
-        )}
+          {featured && (
+            <div className="mt-8 flex justify-center">
+              <a
+                href="https://github.com/lemierus/TPUPROJECT"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 text-sm font-medium text-white transition hover:-translate-y-0.5"
+              >
+                GitHub Link
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          )}
+
+          {/* 📸 DUA GAMBAR TERLETAK PALING BAWAH (BERDAMPINGAN KIRI & KANAN DENGAN ANIMASI & ZOOM) */}
+          {projectImages.length > 0 && (
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6">
+              {projectImages.slice(0, 2).map((imgUrl, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: 0.1 * idx }}
+                  onClick={() => setSelectedPreviewImage(imgUrl)}
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-slate-900 shadow-xl transition hover:border-violet-400/40"
+                >
+                  <img
+                    src={imgUrl}
+                    alt={`${project.title} screenshot ${idx + 1}`}
+                    className="h-full w-full object-cover object-top transition duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-slate-950/40 opacity-0 backdrop-blur-[2px] transition duration-300 group-hover:opacity-100">
+                    <div className="flex items-center gap-2 rounded-full border border-white/20 bg-slate-900/80 px-4 py-2 text-xs font-medium text-white shadow-lg">
+                      <ZoomIn className="h-4 w-4 text-cyan-300" />
+                      <span>Zoom</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </motion.div>
       </motion.div>
-    </motion.div>
+
+      {/* Modal Zoom Gambar */}
+      <AnimatePresence>
+        {selectedPreviewImage && (
+          <motion.div
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedPreviewImage(null)}
+          >
+            <motion.div
+              className="relative max-h-[90vh] max-w-4xl overflow-hidden rounded-2xl border border-white/20 bg-slate-950 p-2 shadow-2xl"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                type="button"
+                onClick={() => setSelectedPreviewImage(null)}
+                className="absolute right-4 top-4 z-10 rounded-full bg-slate-900/80 p-2 text-slate-300 hover:bg-white/20 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <img
+                src={selectedPreviewImage}
+                alt="Enlarged Preview"
+                className="max-h-[85vh] w-full rounded-xl object-contain"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 

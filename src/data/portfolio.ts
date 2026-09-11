@@ -8,7 +8,7 @@ export interface Project {
   problem: string
   approach: string
   role: string
-
+  result?: string
   technologies: string[]
   date?: string
   associatedWith?: string
@@ -119,12 +119,12 @@ export const featuredProject = {
     'Responsive interface',
   ],
 
+  images: [
+    '/images/cemeteryweb.png',
+    '/images/projweb.png'  
+  ],
   result:
     'Delivered a user-friendly web solution designed to work across screen sizes and support consistent cemetery service administration.',
-
-  date: 'Feb 2026 - May 2026',
-
-  associatedWith: 'Universitas Negeri Padang',
 }
 
 export const otherProjects = [
@@ -148,8 +148,7 @@ export const otherProjects = [
       'Android Developer responsible for implementing the mobile interfaces, developing screen navigation, translating Figma designs into Android layouts, and organizing application features into a structured mobile experience.',
 
     technologies: ['Kotlin', 'Android Studio', 'Figma'],
-    date: 'Mar 2025 - May 2025',
-    associatedWith: 'Universitas Negeri Padang',
+
     image: '/images/geprek.jpeg',
   },
 
@@ -173,8 +172,7 @@ export const otherProjects = [
       'Game Developer responsible for implementing the game interface, quiz interactions, navigation, gameplay flow, and integration of visual elements into the educational game.',
 
     technologies: ['Unity', 'C#'],
-    date: 'Sep 2025 - Nov 2025',
-    associatedWith: 'Universitas Negeri Padang',
+
     images: ['/images/ayam1.jpeg', '/images/ayam2.jpeg'],
   },
 ]
